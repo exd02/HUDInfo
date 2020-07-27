@@ -5,12 +5,11 @@ Special thanks to JHUD Creator "blank" and Sikarii-movementhud Creator - One
 #include <sdktools>
 #include <sourcemod>
 #include <clientprefs>
-
-//#include <clientprefs>
+#include <DynamicChannels>
 #include <entity_prop_stocks>
 
 #define PLUGIN_VERSION "1.02"
-#define PLUGIN_URL "https://steamcommunity.com/id/exd1337/"
+#define PLUGIN_URL "https://github.com/exd02/HUDInfo"
 #define GROUND_TICK_TIME 15
 
 public Plugin myinfo = 
@@ -31,8 +30,6 @@ int gI_TextRGB[MAXPLAYERS + 1][3];
 
 Handle gH_KeyHUDCookie;
 Handle gH_HUDSpeed;
-Handle gH_ShowKeysHUD = null;
-Handle gH_ShowSpeedHUD = null;
 
 float gF_OldAngle[MAXPLAYERS + 1];
 float gF_RawGain[MAXPLAYERS + 1];
@@ -49,11 +46,13 @@ public void OnPluginStart()
 	gH_KeyHUDCookie  = RegClientCookie("bKeyHUDCookie",  "bKeyHUDCookie", CookieAccess_Protected);
 	gH_HUDSpeed = RegClientCookie("bGainHUDCookie", "bGainHUDCookie", CookieAccess_Protected);
 
-	gH_ShowKeysHUD = CreateHudSynchronizer();
-	gH_ShowSpeedHUD = CreateHudSynchronizer();
-
 	RegConsoleCmd("sm_hudkeypad", Command_HUDKeyPad, "Toggles ON KeyPad");
+	RegConsoleCmd("sm_keypad", Command_HUDKeyPad, "Toggles ON KeyPad");
+	RegConsoleCmd("sm_keys", Command_HUDKeyPad, "Toggles ON KeyPad");
+
 	RegConsoleCmd("sm_jhud", Command_HUDSpeed, "Toggles ON SSJHUD");
+	RegConsoleCmd("sm_jumphud", Command_HUDSpeed, "Toggles ON SSJHUD");
+	RegConsoleCmd("sm_ssjhud", Command_HUDSpeed, "Toggles ON SSJHUD");
 
 	HookEvent("player_jump", Event_PlayerJump);
 }
@@ -193,10 +192,10 @@ public void GetPlayerSpeed(int client, int target)
 	// =============================================================================================================== //
 }
 
-public void PrintTheText(int client, int r, int g, int b, char[] sTargetSpeed)
+public void PrintTheText(float x, float y, int client, int r, int g, int b, char[] sTargetSpeed, int group)
 {
-	SetHudTextParams(-1.0, -0.65, 1.0, r, g, b, 255, 0, 0.0, 0.0, 0.0);
-	ShowSyncHudText(client, gH_ShowSpeedHUD, "%s", sTargetSpeed);
+	SetHudTextParams(x, y, 1.0, r, g, b, 255, 0, 0.0, 0.0, 0.0);
+	ShowSyncHudText(client, GetDynamicChannel(group), "%s", sTargetSpeed);
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
@@ -223,7 +222,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 			GetStats(client, vel, angles);
 		}
 		gI_TicksOnGround[client] = 0;
-		if (gB_HUDSpeed[client]) PrintTheText(client, gI_TextRGB[client][0], gI_TextRGB[client][1], gI_TextRGB[client][2], gS_SpeedText[client]);
+		if (gB_HUDSpeed[client]) PrintTheText(-1.0, -0.65, client, gI_TextRGB[client][0], gI_TextRGB[client][1], gI_TextRGB[client][2], gS_SpeedText[client],0);
 	}
 
 	// We need to run the function, because the client target can be a player that he is watching
@@ -349,9 +348,7 @@ public void DisplayKeyPad(int client)
 
 
 	// ========================================== Print the sKeys to the HUD ========================================= // 
-	//                 X    Y         R    G    B    A
-	SetHudTextParams(-1.0, 0.2, 1.0, 255, 255, 255, 255, 0, 0.0, 0.0, 0.0);
-	ShowSyncHudText(client, gH_ShowKeysHUD, "%s", sKeys);
+	PrintTheText(-1.0, 0.2, client, 255, 255, 255, sKeys, 1);
 	// =============================================================================================================== //
 }
 
