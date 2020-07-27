@@ -111,7 +111,7 @@ public Action Event_PlayerJump(Event event, const char[] name, bool dontBroadcas
 	// Here we print to the player that is spectating the client
 	for(int i=1; i<MaxClients; i++)
 	{
-		if(IsClientInGame(i) && !IsPlayerAlive(i) && gB_HUDSpeed[i])
+		if(IsClientInGame(i) && !IsPlayerAlive(i) && gB_HUDSpeed[i] && GetEntProp(i, Prop_Data, "m_iObserverMode") != 7)
 		{
 			target = GetEntPropEnt(i, Prop_Data, "m_hObserverTarget");
 			GetPlayerSpeed(client, target);
@@ -265,7 +265,8 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	}
 
 	// We need to run the function, because the client target can be a player that he is watching
-	if (gB_HUDKey[client]) DisplayKeyPad(client);
+	// Only draw huds to real players
+	if (gB_HUDKey[client] && !IsFakeClient(client)) DisplayKeyPad(client);
 	return Plugin_Continue;
 }
 
@@ -317,11 +318,20 @@ public void DisplayKeyPad(int client)
 {
 	// ================================== Select the Target player to track the keys ================================= //
 	int target;
-
+	
 	if(IsPlayerAlive(client))
 		target = client;
 	else
-		target = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+	{
+		int obTarget = GetEntPropEnt(client, Prop_Send, "m_hObserverTarget");
+		int obMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+
+		if ((0 < obTarget <= MaxClients) && obMode != 7)
+		{
+			target = obTarget;
+		}
+		else return;
+	}
 
 	// Get Buttons
 	int buttons = GetClientButtons(target);
