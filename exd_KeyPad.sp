@@ -134,36 +134,86 @@ public void GetPlayerSpeed(int client, int target)
 	// ========================================== Get and convert the Speed ========================================== //
 	float fVelocity[3];
 	GetEntPropVector(target, Prop_Data, "m_vecVelocity", fVelocity);
-
 	int iPlayerSpeed = RoundToFloor(GetVectorLength(fVelocity));
 	// =============================================================================================================== //
 
 	
 
-	// ====================================== Calculate the RGB based in GAIN% ======================================= //
-	int r = 0;
-	int g = 0;
-	int b = 0;
+	// ================================== Calculate the RGB based in GAIN% OR SSJ ==================================== //
+	int r = 0; int rPercentage; 
+	int g = 0; int gPercentage;
+	int b = 0; int bPercentage;
+	char sTargetSpeed[16];
 
-	float coeffsum = gF_RawGain[target];
-	coeffsum /= gI_StrafeTick[target];
-	coeffsum *= 100.0;
-	coeffsum = RoundToFloor(coeffsum * 100.0 + 0.5) / 100.0;
-
-	int percentage = RoundToFloor(coeffsum);
-
-	if (percentage < 0) percentage = 0;
-	else if (percentage > 100) percentage = 100;
-
-	int rPercentage; int gPercentage; int bPercentage;
-	rPercentage = 100 - percentage;
-	gPercentage = percentage;
-
-	if (percentage > 80)
+	int JumpNumber = gI_HopCount[target] - 1;
+	if (gI_HopCount[target] <= 6)
 	{
-		rPercentage = 0;
-		bPercentage = (percentage-80)*5;
-		if (bPercentage<50) bPercentage = 50;
+		int SSJ[6][3];
+		// SSJ [J][C]  J Represents the Jump index and C the color.
+		SSJ[0][0] = 280;
+		SSJ[1][0] = 360;
+		SSJ[2][0] = 440;
+		SSJ[3][0] = 520;
+		SSJ[4][0] = 580;
+		SSJ[5][0] = 600;
+		//
+		SSJ[0][1] = 281;
+		SSJ[1][1] = 380;
+		SSJ[2][1] = 460;
+		SSJ[3][1] = 530;
+		SSJ[4][1] = 600;
+		SSJ[5][1] = 660;
+		// 
+		SSJ[0][2] = 286;
+		SSJ[1][2] = 390;
+		SSJ[2][2] = 480;
+		SSJ[3][2] = 560;
+		SSJ[4][2] = 620;
+		SSJ[5][2] = 680;
+
+		for (int i=0; i<6; i++)
+		{
+			if (iPlayerSpeed <= SSJ[JumpNumber][0])
+			{
+				rPercentage = 100; gPercentage = 0; bPercentage = 0;
+			}
+			else if (iPlayerSpeed <= SSJ[JumpNumber][1])
+			{
+				rPercentage = 90; gPercentage = 65; bPercentage = 0;
+			}
+			else if (iPlayerSpeed <= SSJ[JumpNumber][2])
+			{
+				rPercentage = 0; gPercentage = 90; bPercentage = 15;
+			}
+			else
+			{
+				rPercentage = 0; gPercentage = 90; bPercentage = 90;
+			}
+		}
+		Format(sTargetSpeed, sizeof(sTargetSpeed), "[%i] - %i", gI_HopCount[target], iPlayerSpeed);
+	}
+	else
+	{
+		float coeffsum = gF_RawGain[target];
+		coeffsum /= gI_StrafeTick[target];
+		coeffsum *= 100.0;
+		coeffsum = RoundToFloor(coeffsum * 100.0 + 0.5) / 100.0;
+
+		int percentage = RoundToFloor(coeffsum);
+
+		if (percentage < 0) percentage = 0;
+		else if (percentage > 100) percentage = 100;
+
+		rPercentage = 100 - percentage;
+		gPercentage = percentage;
+
+		if (percentage > 80)
+		{
+			rPercentage = 0;
+			bPercentage = (percentage-80)*5;
+			if (bPercentage<50) bPercentage = 50;
+		}
+		Format(sTargetSpeed, sizeof(sTargetSpeed), "%.02f%%", coeffsum);
 	}
 
 	r = RoundToFloor(2.55*rPercentage);
@@ -174,17 +224,6 @@ public void GetPlayerSpeed(int client, int target)
 
 
 	// ============================================== Print SSJ or %Gain ============================================== //
-	char sTargetSpeed[16]
-
-	if (gI_HopCount[target] <= 6)
-	{
-		Format(sTargetSpeed, sizeof(sTargetSpeed), "[%i] - %i", gI_HopCount[target], iPlayerSpeed);
-	}
-	else
-	{
-		Format(sTargetSpeed, sizeof(sTargetSpeed), "%.02f%%", coeffsum);
-	}
-
 	gI_TextRGB		[client]	[0] 	= r;
 	gI_TextRGB		[client]	[1] 	= g;
 	gI_TextRGB		[client]	[2] 	= b;
@@ -194,7 +233,7 @@ public void GetPlayerSpeed(int client, int target)
 
 public void PrintTheText(float x, float y, int client, int r, int g, int b, char[] sMsg, int group)
 {
-	SetHudTextParams(x, y, 1.0, r, g, b, 255, 0, 0.0, 0.0, 0.0);
+	SetHudTextParams(x, y, 0.5, r, g, b, 255, 0, 0.0, 0.0, 0.0);
 	ShowHudText(client, GetDynamicChannel(group), "%s", sMsg);
 }
 
@@ -307,7 +346,7 @@ public void DisplayKeyPad(int client)
 	// ==================================================== Chars ==================================================== //
 	char sKeys[32];																// The Key HUD
 	char sCharacters[8][5] = {"←", "W", "→", "A", "S", "D", "DUCK", "JUMP"};	// The Characters
-	char sNotPressingButton[2] = "  ";											// Not pressing the Buton Character
+	char sNotPressingButton[2] = "_";											// Not pressing the Buton Character
 	// =============================================================================================================== //
 
 
@@ -347,8 +386,11 @@ public void DisplayKeyPad(int client)
 
 
 
-	// ========================================== Print the sKeys to the HUD ========================================= // 
-	PrintTheText(-1.0, 0.2, client, 255, 255, 255, sKeys, 1);
+	// ========================================== Print the sKeys to the HUD ========================================= //
+	if ((IsPressingTheKey[1] && IsPressingTheKey[4]) || (IsPressingTheKey[5] && IsPressingTheKey[3]))
+		PrintTheText(-1.0, 0.2, client, 255, 100, 100, sKeys, 1);
+	else
+		PrintTheText(-1.0, 0.2, client, 255, 255, 255, sKeys, 1);
 	// =============================================================================================================== //
 }
 
