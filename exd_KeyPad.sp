@@ -192,10 +192,10 @@ public void GetPlayerSpeed(int client, int target)
 	// =============================================================================================================== //
 }
 
-public void PrintTheText(float x, float y, int client, int r, int g, int b, char[] sTargetSpeed, int group)
+public void PrintTheText(float x, float y, int client, int r, int g, int b, char[] sMsg, int group)
 {
 	SetHudTextParams(x, y, 1.0, r, g, b, 255, 0, 0.0, 0.0, 0.0);
-	ShowSyncHudText(client, GetDynamicChannel(group), "%s", sTargetSpeed);
+	ShowHudText(client, GetDynamicChannel(group), "%s", sMsg);
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
@@ -307,7 +307,7 @@ public void DisplayKeyPad(int client)
 	// ==================================================== Chars ==================================================== //
 	char sKeys[32];																// The Key HUD
 	char sCharacters[8][5] = {"←", "W", "→", "A", "S", "D", "DUCK", "JUMP"};	// The Characters
-	char sNotPressingButton[2] = "_";											// Not pressing the Buton Character
+	char sNotPressingButton[2] = "  ";											// Not pressing the Buton Character
 	// =============================================================================================================== //
 
 
