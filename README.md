@@ -1,5 +1,5 @@
 # HUDInfo
-Display in the HUD %GAIN and the Keypad
+KEYPAD: Display the KeyHUD + Angles, JumpHUD: Displays the firsts 6 jumps speed and then the gain%
 
 sm_hudkeypad - Toggles ON HUD KEYPAD
 sm_jhud - Toggles ON SSJHUD+SpeedGain%
