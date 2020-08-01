@@ -1,5 +1,6 @@
 /*
-Special thanks to JHUD Creator "blank" and Sikarii-movementhud Creator - One
+Special thanks to JHUD Creator "blank"
+	and Sikarii-movementhud "One"
 */
 
 #include <sdktools>
