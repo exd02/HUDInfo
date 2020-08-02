@@ -1,7 +1,4 @@
-/*
-Special thanks to JHUD Creator "blank"
-	and Sikarii-movementhud "One"
-*/
+// Based on JHUD and Sikarii-movementhud
 
 #include <sdktools>
 #include <sourcemod>
