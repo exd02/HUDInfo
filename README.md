@@ -1,3 +1,5 @@
+# CS:GO SourceMod Plugin
+
 # HUDInfo
 KEYPAD: Display the KeyHUD + Angles, JumpHUD: Displays the firsts 6 jumps speed and then the gain%
 
