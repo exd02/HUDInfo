@@ -1,10 +1,8 @@
 # CS:GO SourceMod Plugin
 
 # HUDInfo
-KEYPAD: Display the KeyHUD + Angles, JumpHUD: Displays the firsts 6 jumps speed and then the gain%
-
-sm_hudkeypad - Toggles ON HUD KEYPAD
-sm_jhud - Toggles ON SSJHUD+SpeedGain%
+KEYPAD [sm_hudkeypad]: Display the KeyHUD + Angles (Left/Right)
+JumpHUD [sm_jhud]: Displays the firsts 6 jumps speed and then the gain %
 
 # Installation
 Make sure you have this plugin in your server - https://github.com/Vauff/DynamicChannels
